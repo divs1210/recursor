@@ -24,11 +24,10 @@
 (defn local-val [local-binding]
   (some-> local-binding .init .b .sym))
 
-(defn curr-recursor
-  [env]
-  (when env
-    (local-val (env 'curr-recursor))))
-
 (defn internal-name
   [sym]
   (symbol (str sym "-recursor")))
+
+(defn cache-name
+  [sym]
+  (symbol (str sym "-recursor-cache")))

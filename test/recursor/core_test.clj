@@ -1,42 +1,28 @@
 (ns recursor.core-test
   (:require [clojure.test :refer [deftest is]]
-            [recursor.core :refer [defrec letrec recurse return]]))
+            [recursor.core :as r :refer [defrec recurse return]]))
 
-(let [known (volatile! {})
-      save! (fn [k v]
-              (vswap! known assoc k v)
-              v)]
-  (defrec ackermann [m n]
-    (cond
-      (@known [m n])
-      (return (@known [m n]))
+(defrec ^{::r/cache-size 5000}
+  ackermann
+  "Calculates the ackermann function:
+    A(0, n) = n+1
+    A(m, 0) = A(m-1, 1)
+    A(m, n) = A(m-1, A(m, n-1))"
+  [m n]
+  (cond
+    (zero? m)
+    (return (inc n))
 
-      (zero? m)
-      (return (inc n))
+    (zero? n)
+    (recurse (ackermann (dec m) 1))
 
-      (zero? n)
-      (recurse
-       (ackermann (dec m) 1)
-       :then #(save! [(dec m) 1] %))
-
-      :else
-      (recurse
-       (ackermann m (dec n))
-       :then (fn [n']
-               (save! [m (dec n)] n')
-               (ackermann (dec m) n'))))))
+    :else
+    (recurse
+     (ackermann m (dec n))
+     :then #(ackermann (dec m) %))))
 
 (deftest off-stack-recursion-test []
+  (is (.startsWith (-> #'ackermann meta :doc)
+                   "Calculates the ackermann"))
+  (is (== 5000 (-> #'ackermann meta ::r/cache-size)))
   (is (== 8189 (ackermann 3 10))))
-
-
-(letrec [(is-odd? [n]
-           #(if (zero? n)
-              (return false)
-              (is-even? (dec n))))
-         (is-even? [n]
-           #(if (zero? n)
-              (return true)
-              (is-odd? (dec n))))]
-  (deftest mutual-recursion-test
-    (is (trampoline is-even? 10000))))

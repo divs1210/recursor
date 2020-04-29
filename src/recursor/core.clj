@@ -1,5 +1,6 @@
 (ns recursor.core
-  (:require [recursor.util :as u]))
+  (:require [clojure.core.cache.wrapped :as cw]
+            [recursor.util :as u]))
 
 (defonce ^:private
   stack-symbol
@@ -21,29 +22,65 @@
 (defmacro recurse
   "For off-stack recursion.
   Use inside `recfn`, `letrec`, `defrec`, etc."
-  [fn-call & {:keys [then]}]
-  (let [[_ & args] fn-call]
+  [fn-call & {:keys [then]
+              :or {then `identity}}]
+  (let [[op & args] fn-call
+        cache-name (u/cache-name op)
+        env (or &env {})
+        cached? (env cache-name)
+        then+ (if cached?
+                `(fn [v#]
+                   (cw/lookup-or-miss ~cache-name
+                                      [~@args]
+                                      (fn [_#] v#))
+                   (~then v#))
+                then)]
     `(recur ~@args
-            ~(if then
-               `(cons ~then
-                      ~stack-symbol)
-               stack-symbol))))
+            (cons ~then+
+                  ~stack-symbol))))
 
 (defmacro letrec
   "Like `letfn`, but defines `recfn`s instead of `fn`s.
 
-  Note: Use `trampoline` for mutual recursion."
+  **Note:** `recfn`s are not mutually recrsive yet.
+  Use `trampoline` for mutual recursion."
   [fnspecs & body]
-  `(letfn [~@(for [[name argv & body] fnspecs
-                   :let [duped-bindings (for [arg argv
-                                              arg [arg arg]]
-                                          arg)]]
-               `(~name ~argv
-                 (let [~'curr-recursor ~name]
-                   (loop [~@duped-bindings
-                          ~stack-symbol []]
-                     ~@body))))]
-     ~@body))
+  `(let [~@(for [[name] fnspecs
+                 :let [cache-name (u/cache-name name)
+                       cache-size (some->> name
+                                           meta
+                                           ::cache-size)]
+                 :when cache-size
+                 e [cache-name
+                    `(cw/lu-cache-factory
+                      {} :threshold ~cache-size)]]
+             e)]
+     (letfn [~@(for [[name argv & body] fnspecs
+                     :let [internal-name (u/internal-name name)
+                           cache-name (u/cache-name name)
+                           duped-bindings (for [arg argv
+                                                arg [arg arg]]
+                                            arg)
+                           cached? (some->> name meta ::cache-size)]
+                     a-recfn [`(~internal-name ~argv
+                                (loop [~@duped-bindings
+                                       ~stack-symbol []]
+                                  ~(if cached?
+                                     `(if (cw/has? ~cache-name ~argv)
+                                        (return (cw/lookup ~cache-name ~argv))
+                                        (let []
+                                          ~@body))
+                                     `(let []
+                                        ~@body))))
+                              `(~name ~argv
+                                ~(if cached?
+                                   `(cw/lookup-or-miss ~cache-name
+                                                       ~argv
+                                                       (fn [k#]
+                                                         (apply ~internal-name k#)))
+                                   `(~internal-name ~@argv)))]]
+                 a-recfn)]
+       ~@body)))
 
 (defmacro recfn
   "Like `fn`, but with a custom call stack.
