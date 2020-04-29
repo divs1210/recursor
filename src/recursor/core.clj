@@ -17,52 +17,33 @@
   "Breaks recursion, returns given value.
   Use inside `recfn`, `letrec`, `defrec`, etc."
   [x]
-  (if (u/curr-recursor &env)
-    `(return* ~x ~stack-symbol)
-    (throw (Exception. "return should be used inside a recfn!"))))
+  `(return* ~x ~stack-symbol))
 
 (defmacro recurse
   "For off-stack recursion.
   Use inside `recfn`, `letrec`, `defrec`, etc."
   [fn-call & {:keys [then]}]
-  (let [[op & args] (if (seq? fn-call)
-                      fn-call
-                      nil)
-        recursor (u/curr-recursor &env)]
-    (cond
-      (nil? recursor)
-      (throw (Exception. "recurse should be used inside a recfn!"))
-
-      (not= op recursor)
-      (throw (Exception. (str "Expected fn-call to be like ("
-                              (u/curr-recursor &env)
-                              " ...), but got " fn-call)))
-
-      :else
-      `(recur ~@args
-              ~(if then
-                 `(cons ~then
-                        ~stack-symbol)
-                 stack-symbol)))))
+  (let [[op & args] fn-call]
+    `(recur ~@args
+            ~(if then
+               `(cons ~then
+                      ~stack-symbol)
+               stack-symbol))))
 
 (defmacro letrec
   "Like `letfn`, but defines `recfn`s instead of `fn`s.
 
-  Note: Does NOT support mutual recursion yet."
+  Note: Use `trampoline` for mutual recursion."
   [fnspecs & body]
   `(letfn [~@(for [[name argv & body] fnspecs
                    :let [duped-bindings (for [arg argv
                                               arg [arg arg]]
                                           arg)]]
-               (if (some #(and (symbol? %)
-                               (= #'return (resolve %)))
-                         (flatten body))
-                 `(~name ~argv
-                   (let [~'curr-recursor ~name]
-                     (loop [~@duped-bindings
-                            ~stack-symbol []]
-                       ~@body)))
-                 (throw (Exception. "recfns should have at least one call to return!"))))]
+               `(~name ~argv
+                 (let [~'curr-recursor ~name]
+                   (loop [~@duped-bindings
+                          ~stack-symbol []]
+                     ~@body))))]
      ~@body))
 
 (defmacro recfn
