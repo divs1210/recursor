@@ -71,7 +71,7 @@ user> (time (A 4 1))
 
 It achieves this by:
 
-1. Using a custom stack on the heap instead of the JVM stack
+1. Using a custom **unbounded** stack
 2. **Optionally** using an [LU cache](https://github.com/clojure/core.cache/wiki/LU) to remember past results if specified in the metadata
 
 It also provides replacements for some other Clojure core forms, all of which can be memoized by setting `^{::r/cache-size <SOME-NUMBER>}` before their names:
