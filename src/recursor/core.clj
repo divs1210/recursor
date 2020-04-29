@@ -1,5 +1,6 @@
 (ns recursor.core
-  (:require [recursor.util :as u]))
+  (:require [recursor.util :as u]
+            [clojure.core.memoize :as memo]))
 
 (defonce ^:private
   stack-symbol
@@ -70,16 +71,17 @@
   - base values should be wrapped in `return`"
   [name argv & body]
   `(letrec [(~name ~argv ~@body)]
-           ~name))
+     ~name))
 
 (defn- defrec*
   [args & [private?]]
   (let [{:keys [name doc argv body]} (u/parse-params args)
         meta-data {:doc doc
                    :arglists [(list 'quote argv)]
-                   :private (boolean private?)}]
-    `(def ~(u/add-meta name meta-data)
-       (recfn ~name ~argv
+                   :private (boolean private?)}
+        name-with-meta (u/add-meta name meta-data)]
+    `(def ~name-with-meta
+       (recfn ~name-with-meta ~argv
           ~@body))))
 
 (defmacro defrec

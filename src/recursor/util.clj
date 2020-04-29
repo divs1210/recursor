@@ -28,3 +28,7 @@
   [env]
   (when env
     (local-val (env 'curr-recursor))))
+
+(defn internal-name
+  [sym]
+  (symbol (str sym "-recursor")))
