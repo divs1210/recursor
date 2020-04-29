@@ -1,14 +1,16 @@
 # recursor
+[![CircleCI](https://circleci.com/gh/divs1210/recursor/tree/master.svg?style=svg)](https://circleci.com/gh/divs1210/recursor/tree/master)
+[![codecov](https://codecov.io/gh/divs1210/recursor/branch/master/graph/badge.svg)](https://codecov.io/gh/divs1210/recursor)
 
-A Clojure library designed to ... well, that part is up to you.
+Better recursion for Clojure.
 
 ## Usage
 
-FIXME
+Todo
 
 ## License
 
-Copyright © 2020 FIXME
+Copyright © 2020 Divyansh Prakash
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
