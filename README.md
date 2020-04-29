@@ -76,7 +76,7 @@ user> (time (A 4 1))
 It achieves this by:
 
 1. Using a custom stack on the heap instead of the JVM stack
-2. **Optionally** using an [LU cache](https://en.wikipedia.org/wiki/Least_frequently_used) to remember past results if specified in the metadata
+2. **Optionally** using an [LU cache](https://github.com/clojure/core.cache/wiki/LU) to remember past results if specified in the metadata
 
 It also provides replacements for some other Clojure core forms, all of which can be memoized by setting `^{::r/cache-size <SOME-NUMBER>}` before their names:
 
@@ -89,7 +89,7 @@ It also provides replacements for some other Clojure core forms, all of which ca
 All of these work in the way you would expect them to, with the following caveats:
 
 1. No varargs - `(recfn f [x & xs])` ❌
-2. No destructuring hashmaps in arguments vector `(recfn f [{:keys [a b]}])` ❌
+2. No destructuring hashmaps in arguments vector - `(recfn f [{:keys [a b]}])` ❌
 3. No mutual recursion support - use [trampoline](https://clojuredocs.org/clojure.core/trampoline) as usual
 
 All this is subject to change.
