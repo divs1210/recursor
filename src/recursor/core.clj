@@ -21,23 +21,27 @@
 
 (defmacro recurse
   "For off-stack recursion.
-  Use inside `recfn`, `letrec`, `defrec`, etc."
-  [fn-call & {:keys [then]
-              :or {then `identity}}]
+  Use inside `recfn`, `letrec`, `defrec`, etc.
+  To perform a calculation with the returned value of
+  this recursive call, pass a `fn` as `:then`.
+  To perform multiple calculations, pass a list of
+  `fn`s as `:thens` in the required order."
+  [fn-call & {:keys [then thens]}]
   (let [[op & args] fn-call
         cache-name (u/cache-name op)
         env (or &env {})
         cached? (env cache-name)
-        then+ (if cached?
+        save! (when cached?
                 `(fn [v#]
                    (cw/lookup-or-miss ~cache-name
                                       [~@args]
-                                      (fn [_#] v#))
-                   (~then v#))
-                then)]
-    `(recur ~@args
-            (cons ~then+
-                  ~stack-symbol))))
+                                      (fn [_#] v#))))
+        thens+ (vec (remove nil? (cons save! (cons then thens))))
+        new-stack (if (seq thens+)
+                    `(concat ~thens+
+                             ~stack-symbol)
+                    stack-symbol)]
+    `(recur ~@args ~new-stack)))
 
 (defmacro letrec
   "Like `letfn`, but defines `recfn`s instead of `fn`s.
