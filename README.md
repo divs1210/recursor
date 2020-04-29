@@ -1,4 +1,5 @@
 # recursor
+[![Clojars Project](https://img.shields.io/clojars/v/recursor.svg)](https://clojars.org/recursor)
 [![CircleCI](https://circleci.com/gh/divs1210/recursor/tree/master.svg?style=svg)](https://circleci.com/gh/divs1210/recursor/tree/master)
 [![codecov](https://codecov.io/gh/divs1210/recursor/branch/master/graph/badge.svg)](https://codecov.io/gh/divs1210/recursor)
 
@@ -89,7 +90,7 @@ All of these work in the way you would expect them to, with the following caveat
 
 1. No varargs - `(recfn f [x & xs])` ❌
 2. No destructuring hashmaps in arguments vector `(recfn f [{:keys [a b]}])` ❌
-3. No mutual recursion support, use [trampoline](https://clojuredocs.org/clojure.core/trampoline) as usual
+3. No mutual recursion support - use [trampoline](https://clojuredocs.org/clojure.core/trampoline) as usual
 
 All this is subject to change.
 
