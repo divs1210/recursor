@@ -21,9 +21,10 @@ Here's a straightforward implementation in Clojure:
 
 ```clojure
 (defn A [m n]
-  (cond (zero? m) (inc n)
-        (zero? n) (recur (dec m) 1)
-        :else (recur (dec m) (A m (dec n)))))
+  (cond
+    (zero? m) (inc n)
+    (zero? n) (recur (dec m) 1)
+    :else (recur (dec m) (A m (dec n)))))
 ```
 
 Great! Let's try it out!
@@ -36,10 +37,11 @@ user> (time (A 4 1))
 ;; StackOverflowError !!!
 ```
 
-Now while you are looking for a mathematician and trying to:
+Now, while you:
 
-1. bribe them to derive an iterative version of the function, and
-2. offer them beer to optimize it
+1. look for a mathematician, and
+2. plead them to derive an iterative version of the function, and
+3. refuse to budge till they optimize it
 
 I will do this:
 
@@ -50,16 +52,10 @@ I will do this:
   A
   [m n]
   (cond
-    (zero? m)
-    (return (inc n))
-
-    (zero? n)
-    (recurse (A (dec m) 1))
-
-    :else
-    (recurse
-     (A m (dec n))
-     :then #(A (dec m) %))))
+    (zero? m) (return (inc n))
+    (zero? n) (recurse (A (dec m) 1))
+    :else (recurse (A m (dec n))
+            :then #(A (dec m) %))))
 ```
 
 Let's see what it can do:
