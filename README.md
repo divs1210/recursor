@@ -82,17 +82,19 @@ It also provides replacements for some other Clojure core forms, all of which ca
 
 | clojure.core  | recursor.core |
 |:-------------:|:-------------:|
-| fn            | recfn         |
-| defn          | defrec        |
-| letfn         | letrec        |
+| `fn`          | `recfn`       |
+| `defn`        | `defrec`      |
+| `defn-`       | `defrec-`     |
+| `letfn`       | `letrec`      |
 
 All of these work in the way you would expect them to, with the following caveats:
 
 1. No varargs - `(recfn f [x & xs])` ❌
-2. No destructuring hashmaps in arguments vector - `(recfn f [{:keys [a b]}])` ❌
-3. No mutual recursion support - use [trampoline](https://clojuredocs.org/clojure.core/trampoline) as usual
+2. No destructuring maps in arguments vector - `(recfn f [{:keys [a b]}])` ❌
+3. No multiple-arity `recfn`s - use a multi-arity `fn` to dispatch to fixed-arity `recfn`
+4. No mutual recursion support - use [trampoline](https://clojuredocs.org/clojure.core/trampoline) as usual
 
-All this is subject to change.
+All this is subject to change **without** breaking the API.
 
 ## License
 
