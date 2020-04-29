@@ -1,6 +1,5 @@
 (ns recursor.core
-  (:require [recursor.util :as u]
-            [clojure.core.memoize :as memo]))
+  (:require [recursor.util :as u]))
 
 (defonce ^:private
   stack-symbol
@@ -23,7 +22,7 @@
   "For off-stack recursion.
   Use inside `recfn`, `letrec`, `defrec`, etc."
   [fn-call & {:keys [then]}]
-  (let [[op & args] fn-call]
+  (let [[_ & args] fn-call]
     `(recur ~@args
             ~(if then
                `(cons ~then
