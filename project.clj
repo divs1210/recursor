@@ -5,4 +5,5 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/core.cache "1.0.207"]]
-  :repl-options {:init-ns recursor.core})
+  :repl-options {:init-ns recursor.core}
+  :profiles {:dev {:plugins [[lein-cloverage "1.1.1"]]}})
