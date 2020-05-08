@@ -3,9 +3,7 @@
 [![CircleCI](https://circleci.com/gh/divs1210/recursor/tree/master.svg?style=svg)](https://circleci.com/gh/divs1210/recursor/tree/master)
 [![codecov](https://codecov.io/gh/divs1210/recursor/branch/master/graph/badge.svg)](https://codecov.io/gh/divs1210/recursor)
 
-**Claim:** Better recursion for Clojure.
-
-**Addendum:** *If you find a better way to recurse in Clojure, I will eat my hat.*
+Better recursion for Clojure.
 
 ## Usage
 
@@ -85,9 +83,9 @@ It also provides replacements for some other Clojure core forms, all of which ca
 
 All of these work in the way you would expect them to, with the following caveats:
 
-1. No varargs - `(recfn f [x & xs])` ❌
-2. No destructuring maps in arguments vector - `(recfn f [{:keys [a b]}])` ❌
-3. No multiple-arity `recfn`s - use a multi-arity `fn` to dispatch to fixed-arity `recfn`
+1. No varargs in `recfn`s - use a `fn` with varargs to dispatch to fixed-arity `recfn`
+2. No multiple-arity `recfn`s - use a multi-arity `fn` to dispatch to fixed-arity `recfn`
+3. No destructuring maps in arguments vector - `(recfn f [{:keys [a b]}])`
 4. No mutual recursion support - use [trampoline](https://clojuredocs.org/clojure.core/trampoline) as usual
 
 All this is subject to change **without** breaking the API.
