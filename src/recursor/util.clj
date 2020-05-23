@@ -21,9 +21,6 @@
              (nth args 2))
      :body (drop (if docstring 3 2) args)}))
 
-(defn local-val [local-binding]
-  (some-> local-binding .init .b .sym))
-
 (defn internal-name
   [sym]
   (symbol (str sym "-recursor")))
