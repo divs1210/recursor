@@ -111,6 +111,6 @@
   (defrec* args))
 
 (defmacro defrec-
-  "Like `defn`, but defines a `recfn` instead of a `fn`."
+  "Like `defn-`, but defines a `recfn` instead of a `fn`."
   [& args]
   (defrec* args true))
